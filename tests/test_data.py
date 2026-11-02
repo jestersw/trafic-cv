@@ -149,3 +149,16 @@ def test_download_reports_missing_archives(tmp_path: Path, capsys):
             ["--out", str(tmp_path / "raw"), "--archives", str(tmp_path), "--no-download"]
         )
     assert "drive.google.com" in capsys.readouterr().out
+
+
+def test_download_moves_folders_unpacked_by_browser(tmp_path: Path):
+    from traffic_cv.data.download import ARCHIVES
+    from traffic_cv.data.download import main as download_main
+
+    archives = tmp_path / "_archives"
+    for name in ARCHIVES:
+        (archives / name[:-4] / "MVI_1").mkdir(parents=True)
+    out = tmp_path / "UA-DETRAC"
+    download_main(["--out", str(out), "--no-download"])
+    assert sorted(p.name for p in out.iterdir()) == sorted(n[:-4] for n in ARCHIVES)
+    assert not any((archives / n[:-4]).exists() for n in ARCHIVES)

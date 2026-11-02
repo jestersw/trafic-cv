@@ -1,0 +1,88 @@
+schema: '2.0'
+stages:
+  convert:
+    cmd: python -m traffic_cv.data.convert --config configs/data.yaml
+    deps:
+    - path: data/raw/UA-DETRAC
+      hash: md5
+      md5: ef5c9089f2e461f5c64902bb8b823469.dir
+      size: 10248708545
+      nfiles: 140231
+    - path: src/traffic_cv/data/convert.py
+      hash: md5
+      md5: 48d31d52bce962c9a677b8f806a8ba72
+      size: 10300
+    - path: src/traffic_cv/data/detrac.py
+      hash: md5
+      md5: a3ce88824e11164c90a43f93f2532726
+      size: 2847
+    - path: src/traffic_cv/data/split.py
+      hash: md5
+      md5: ce9a2bb6db08054d1d8a5a0b7e7e1ba8
+      size: 2070
+    params:
+      configs/data.yaml:
+        class_map:
+          car: car
+          bus: bus
+          van: van
+          others: others
+        classes:
+        - car
+        - bus
+        - van
+        - others
+        frame_step:
+          train: 5
+          val: 10
+          test: 10
+        mask_ignored_regions: true
+        min_box_side: 4
+        out_root: data/processed/detrac
+        raw_root: data/raw/UA-DETRAC
+        sources:
+        - annotations: DETRAC-Train-Annotations-XML
+          official_split: train
+        - annotations: DETRAC-Test-Annotations-XML
+          official_split: test
+        split:
+          strategy: official
+          val_fraction: 0.15
+          test_fraction: 0.2
+          stratify_by: weather
+          seed: 42
+    outs:
+    - path: data/processed/detrac
+      hash: md5
+      md5: 0990f7d41212c356185c9b46a9cd4869.dir
+      size: 2412111390
+      nfiles: 42347
+  eda:
+    cmd: python -m traffic_cv.data.eda --data data/processed/detrac --out 
+      reports/eda
+    deps:
+    - path: data/processed/detrac/boxes.csv
+      hash: md5
+      md5: 7e4ba06c7c75165aed1f87156bda0003
+      size: 10841275
+    - path: data/processed/detrac/sequences.csv
+      hash: md5
+      md5: dfcb5758b3b02674b87221ef9afea949
+      size: 4554
+    - path: src/traffic_cv/data/eda.py
+      hash: md5
+      md5: 19a86ff99ceae20ca909cb617ab94be2
+      size: 4372
+    outs:
+    - path: reports/eda/eda.png
+      hash: md5
+      md5: b23ca9e7f58734edec777ee09e09003b
+      size: 53240
+    - path: reports/eda/stats.json
+      hash: md5
+      md5: 50b662e8a285b9d4d9bd9212cd2af0a9
+      size: 1754
+    - path: reports/eda/stats.md
+      hash: md5
+      md5: 7596fd4ab97faf9929e66e54c44dbae3
+      size: 1007

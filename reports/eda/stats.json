@@ -1,0 +1,101 @@
+{
+  "split_summary": {
+    "sequences": {
+      "train": "51",
+      "val": "9",
+      "test": "40"
+    },
+    "frames": {
+      "train": "70751",
+      "val": "13040",
+      "test": "56340"
+    },
+    "exported_frames": {
+      "train": "14153",
+      "val": "1305",
+      "test": "5640"
+    },
+    "tracks": {
+      "train": "4841",
+      "val": "1111",
+      "test": "2337"
+    },
+    "boxes": {
+      "train": "104998",
+      "val": "6984",
+      "test": "63757"
+    }
+  },
+  "class_by_split": {
+    "train": {
+      "bus": "5699",
+      "car": "89050",
+      "others": "584",
+      "van": "9665"
+    },
+    "val": {
+      "bus": "472",
+      "car": "5610",
+      "others": "78",
+      "van": "824"
+    },
+    "test": {
+      "bus": "6670",
+      "car": "51835",
+      "others": "1659",
+      "van": "3593"
+    },
+    "total": {
+      "bus": "12841",
+      "car": "146495",
+      "others": "2321",
+      "van": "14082"
+    },
+    "share": {
+      "bus": "7.3%",
+      "car": "83.4%",
+      "others": "1.3%",
+      "van": "8.0%"
+    }
+  },
+  "size_by_class": {
+    "small (<32\u00b2)": {
+      "bus": "50",
+      "car": "15217",
+      "others": "15",
+      "van": "1111"
+    },
+    "medium": {
+      "bus": "2512",
+      "car": "102894",
+      "others": "969",
+      "van": "8491"
+    },
+    "large (>96\u00b2)": {
+      "bus": "10279",
+      "car": "28384",
+      "others": "1337",
+      "van": "4480"
+    }
+  },
+  "weather_sequences": {
+    "train": {
+      "cloudy": "16",
+      "night": "14",
+      "rainy": "8",
+      "sunny": "13"
+    },
+    "val": {
+      "cloudy": "3",
+      "night": "2",
+      "rainy": "2",
+      "sunny": "2"
+    },
+    "test": {
+      "cloudy": "11",
+      "night": "12",
+      "rainy": "9",
+      "sunny": "8"
+    }
+  }
+}

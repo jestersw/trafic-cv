@@ -1,11 +1,3 @@
-"""Constant-velocity Kalman filter over boxes, as in SORT (Bewley et al., 2016).
-
-State:       [cx, cy, s, r, vcx, vcy, vs]   (s = area, r = aspect w/h, r is constant)
-Measurement: [cx, cy, s, r]
-
-Kept deliberately small (plain numpy, no filterpy) so it ports line-by-line to Rust.
-"""
-
 from __future__ import annotations
 
 import numpy as np
@@ -22,7 +14,7 @@ _Q[-1, -1] *= 0.01
 _Q[4:, 4:] *= 0.01
 
 _P0 = np.eye(7) * 10.0
-_P0[4:, 4:] *= 1000.0  # high uncertainty for unobserved velocities
+_P0[4:, 4:] *= 1000.0
 
 
 def xyxy_to_z(b: np.ndarray) -> np.ndarray:
@@ -46,7 +38,7 @@ class KalmanBoxFilter:
         self.P = _P0.copy()
 
     def predict(self) -> np.ndarray:
-        if self.x[2] + self.x[6] <= 0:  # area must stay positive
+        if self.x[2] + self.x[6] <= 0:
             self.x[6] = 0.0
         self.x = _F @ self.x
         self.P = _F @ self.P @ _F.T + _Q

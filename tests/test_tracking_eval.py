@@ -17,7 +17,6 @@ from traffic_cv.tracking.evaluate import (
 
 
 def _make_seq(tmp_path: Path, n_frames=60, occlude=range(25, 31)) -> tuple[MotSequence, list]:
-    """Two cars driving in opposite directions; car 1 vanishes for a few frames."""
     d = tmp_path / "MVI_TEST"
     (d / "gt").mkdir(parents=True)
     rows, dets = [], []
@@ -28,7 +27,7 @@ def _make_seq(tmp_path: Path, n_frames=60, occlude=range(25, 31)) -> tuple[MotSe
         for tid, x, y, w, h in boxes:
             rows.append(f"{f},{tid},{x},{y},{w},{h},1,0,1")
             if tid == 1 and f in occlude:
-                continue  # detector misses the object (occlusion)
+                continue
             jx, jy = rng.normal(0, 1.0, 2)
             fd.append([x + jx, y + jy, x + w + jx, y + h + jy, 0.9, 0])
         dets.append(np.array(fd).reshape(-1, 6))
@@ -62,7 +61,7 @@ def test_bytetrack_beats_sort_through_occlusion(tmp_path):
     assert bt["mota"] > 0.85
     assert bt["idf1"] > 0.9
     assert bt["num_switches"] == 0
-    assert so["idf1"] < bt["idf1"]  # SORT starts a new ID after the gap
+    assert so["idf1"] < bt["idf1"]
     assert (tmp_path / "res" / "bytetrack" / "MVI_TEST.txt").exists()
 
     table = compare_table(report)

@@ -1,17 +1,3 @@
-"""Evaluate detector weights on a dataset split and build a comparison table.
-
-Usage::
-
-    python -m traffic_cv.detection.evaluate \\
-        --weights models/baseline.pt models/finetune.pt --split test --out reports/detection
-
-    # or only build the table from metrics already written by train.py
-    python -m traffic_cv.detection.evaluate \\
-        --results reports/detection/baseline.json reports/detection/finetune.json
-
-Writes ``<out>/<weights-stem>.json`` per model and ``<out>/compare.md``.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -28,7 +14,6 @@ def evaluate_weights(
     device: str | None = None,
     conf: float = 0.001,
 ) -> dict:
-    """mAP via Ultralytics' validator (COCO-style 101-point AP)."""
     from ultralytics import YOLO
 
     m = YOLO(str(weights)).val(

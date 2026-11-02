@@ -1,21 +1,3 @@
-"""Convert UA-DETRAC to YOLO format with a video-level split.
-
-Usage::
-
-    python -m traffic_cv.data.convert --config configs/data.yaml
-
-Produces under ``out_root``::
-
-    images/{train,val,test}/MVI_20011_img00001.jpg
-    labels/{train,val,test}/MVI_20011_img00001.txt   # YOLO: cls cx cy w h (normalised)
-    mot/{split}/MVI_xxxxx/gt/gt.txt                  # MOTChallenge GT, every frame (val/test)
-    mot/{split}/MVI_xxxxx/seqinfo.ini
-    boxes.csv                                         # one row per exported box, for EDA
-    sequences.csv                                     # one row per sequence
-    split.json
-    dataset.yaml                                      # Ultralytics dataset config
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -39,7 +21,7 @@ from traffic_cv.data.detrac import (
 )
 from traffic_cv.data.split import SeqInfo, split_sequences
 
-IGNORE_FILL = (114, 114, 114)  # same grey Ultralytics uses for letterbox padding
+IGNORE_FILL = (114, 114, 114)
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,14 +31,13 @@ class SeqJob:
     split: str
     frame_step: int
     out_root: Path
-    class_ids: dict[str, int]  # raw vehicle_type -> class id
+    class_ids: dict[str, int]
     mask_ignored: bool
     min_box_side: float
     export_mot: bool
 
 
 def overlap_fraction(box: Box, region: Box) -> float:
-    """Fraction of ``box`` area covered by ``region``."""
     ax1, ay1, ax2, ay2 = box.xyxy
     bx1, by1, bx2, by2 = region.xyxy
     iw = max(0.0, min(ax2, bx2) - max(ax1, bx1))
@@ -79,7 +60,6 @@ def _write_image(src: Path, dst: Path, regions: list[Box], mask: bool) -> None:
     if dst.exists():
         dst.unlink()
     if not mask or not regions:
-        # hard link when possible (same FS, no extra space, survives DVC), else copy
         try:
             os.link(src, dst)
         except OSError:
@@ -97,7 +77,6 @@ def _write_image(src: Path, dst: Path, regions: list[Box], mask: bool) -> None:
 
 
 def _write_mot(seq: Sequence, job: SeqJob, n_frames: int) -> None:
-    """MOTChallenge GT: frame,id,x,y,w,h,conf,class,visibility (1-based frames)."""
     seq_dir = job.out_root / "mot" / job.split / seq.name
     (seq_dir / "gt").mkdir(parents=True, exist_ok=True)
     with open(seq_dir / "gt" / "gt.txt", "w") as f:
@@ -191,20 +170,43 @@ def convert_sequence(job: SeqJob) -> tuple[dict, list[dict]]:
     return seq_row, box_rows
 
 
+def index_dirs(raw: Path, annotation_names: set[str]) -> tuple[dict[str, Path], dict[str, Path]]:
+    annotations: dict[str, Path] = {}
+    sequences: dict[str, Path] = {}
+    for dirpath, dirnames, _ in os.walk(raw):
+        if Path(dirpath).name.startswith("__MACOSX"):
+            dirnames[:] = []
+            continue
+        keep = []
+        for d in dirnames:
+            full = Path(dirpath) / d
+            if d in annotation_names:
+                annotations.setdefault(d, full)
+            elif d.startswith("MVI_"):
+                if d in sequences and sequences[d] != full:
+                    raise ValueError(f"sequence {d} found twice: {sequences[d]} and {full}")
+                sequences[d] = full
+            else:
+                keep.append(d)
+        dirnames[:] = keep
+    return annotations, sequences
+
+
 def discover(cfg: dict) -> list[tuple[SeqInfo, Path, Path]]:
     raw = Path(cfg["raw_root"])
+    names = {src["annotations"] for src in cfg["sources"]}
+    ann_dirs, seq_dirs = index_dirs(raw, names)
     found = []
     for src in cfg["sources"]:
-        ann_dir, img_dir = raw / src["annotations"], raw / src["images"]
-        if not ann_dir.is_dir():
-            print(f"[warn] annotations dir missing, skipping: {ann_dir}")
+        ann_dir = ann_dirs.get(src["annotations"])
+        if ann_dir is None:
+            print(f"[warn] {src['annotations']} not found under {raw}, skipping")
             continue
         for xml in sorted(ann_dir.glob("*.xml")):
-            seq_img_dir = img_dir / xml.stem
-            if not seq_img_dir.is_dir():
+            seq_img_dir = seq_dirs.get(xml.stem)
+            if seq_img_dir is None:
                 print(f"[warn] no images for {xml.stem}, skipping")
                 continue
-            # cheap attribute read; full parse happens in the worker
             seq = parse_sequence(xml)
             info = SeqInfo(xml.stem, src["official_split"], seq.weather, seq.num_frames)
             found.append((info, xml, seq_img_dir))
@@ -243,7 +245,6 @@ def main(argv: list[str] | None = None) -> None:
     )
     seq_split = {name: part for part, names in split.items() for name in names}
 
-    # clean rebuild: stale files from a previous config must not linger
     for sub in ("images", "labels", "mot"):
         shutil.rmtree(out_root / sub, ignore_errors=True)
     out_root.mkdir(parents=True, exist_ok=True)
@@ -284,8 +285,6 @@ def main(argv: list[str] | None = None) -> None:
     (out_root / "dataset.yaml").write_text(
         yaml.safe_dump(
             {
-                # no "path" key: Ultralytics then resolves splits relative to this
-                # file, so the dataset stays portable after `dvc pull` elsewhere.
                 "train": "images/train",
                 "val": "images/val",
                 "test": "images/test",

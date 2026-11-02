@@ -1,17 +1,3 @@
-"""ByteTrack (Zhang et al., 2022): associate *every* detection box, not only confident ones.
-
-Two-stage association per frame:
-  1. high-score detections  <-> all tracks (tracked + recently lost)
-  2. low-score detections   <-> tracks left unmatched in stage 1 that were tracked last frame
-     (recovers occluded / blurred vehicles whose score dropped, instead of killing the track)
-  3. unconfirmed (1-frame-old) tracks <-> remaining high-score detections
-New tracks start only from unmatched high-score detections; lost tracks are kept for
-``track_buffer`` frames so an object can re-appear with the same ID.
-
-Motion model is the SORT Kalman filter (xysr) rather than the original xyah one, to share
-code with SORT and keep the comparison about the association strategy.
-"""
-
 from __future__ import annotations
 
 import numpy as np
@@ -40,15 +26,14 @@ class ByteTrack:
         self.reset()
 
     def reset(self) -> None:
-        self.tracked: list[Track] = []  # seen in the previous frame
-        self.lost: list[Track] = []  # missed recently, kept for re-identification
+        self.tracked: list[Track] = []
+        self.lost: list[Track] = []
         self.frame_count = 0
         self._next_id = 1
 
     def _new_track(self, det: np.ndarray) -> Track:
         t = Track(self._next_id, det)
         self._next_id += 1
-        # first frame of a video: activate immediately (nothing to confirm against)
         t.activated = self.frame_count == 1
         return t
 
@@ -64,7 +49,6 @@ class ByteTrack:
         for t in pool + unconfirmed:
             t.predict()
 
-        # --- stage 1: high-score dets vs confirmed + lost tracks
         pool_boxes = np.array([t.kf.box for t in pool]).reshape(-1, 4)
         m1, um_t1, um_d1 = associate(pool_boxes, high, self.match_iou)
         next_tracked: list[Track] = []
@@ -72,7 +56,6 @@ class ByteTrack:
             pool[ti].update(high[di])
             next_tracked.append(pool[ti])
 
-        # --- stage 2: low-score dets vs still-unmatched tracks that were tracked last frame
         remain = [pool[i] for i in um_t1 if pool[i] in confirmed]
         remain_boxes = np.array([t.kf.box for t in remain]).reshape(-1, 4)
         m2, um_t2, _ = associate(remain_boxes, low, self.low_match_iou)
@@ -81,9 +64,8 @@ class ByteTrack:
             next_tracked.append(remain[ti])
 
         still_lost = [remain[i] for i in um_t2]
-        still_lost += [pool[i] for i in um_t1 if pool[i] not in confirmed]  # were lost already
+        still_lost += [pool[i] for i in um_t1 if pool[i] not in confirmed]
 
-        # --- stage 3: unconfirmed tracks vs leftover high dets
         left_high = high[um_d1]
         unc_boxes = np.array([t.kf.box for t in unconfirmed]).reshape(-1, 4)
         m3, _, um_d3 = associate(unc_boxes, left_high, self.unconfirmed_match_iou)
@@ -91,9 +73,7 @@ class ByteTrack:
             unconfirmed[ti].update(left_high[di])
             unconfirmed[ti].activated = True
             next_tracked.append(unconfirmed[ti])
-        # unmatched unconfirmed tracks are dropped (likely false positives)
 
-        # --- new tracks
         for di in um_d3:
             if left_high[di, 4] >= self.new_track_thresh:
                 next_tracked.append(self._new_track(left_high[di]))

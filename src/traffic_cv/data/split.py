@@ -1,10 +1,3 @@
-"""Video-level train/val/test split.
-
-Frames of one sequence are strongly correlated, so splitting by frame leaks the
-test set into training. We split whole sequences, stratified by a sequence
-attribute (weather) so that night/rain footage appears in every split.
-"""
-
 from __future__ import annotations
 
 import random
@@ -16,15 +9,14 @@ from dataclasses import dataclass
 @dataclass(frozen=True, slots=True)
 class SeqInfo:
     name: str
-    official_split: str  # "train" | "test"
-    stratum: str  # e.g. weather
+    official_split: str
+    stratum: str
     num_frames: int = 0
 
 
 def _take_fraction(
     seqs: list[SeqInfo], fraction: float, rng: random.Random
 ) -> tuple[list[SeqInfo], list[SeqInfo]]:
-    """Move ~fraction of sequences (per stratum) out. Returns (kept, taken)."""
     by_stratum: dict[str, list[SeqInfo]] = defaultdict(list)
     for s in seqs:
         by_stratum[s.stratum].append(s)
@@ -34,7 +26,6 @@ def _take_fraction(
     for stratum in sorted(by_stratum):
         group = sorted(by_stratum[stratum], key=lambda s: s.name)
         rng.shuffle(group)
-        # at least one taken per stratum if the stratum has >= 2 sequences
         n_take = round(len(group) * fraction)
         if fraction > 0 and n_take == 0 and len(group) >= 2:
             n_take = 1
@@ -50,7 +41,6 @@ def split_sequences(
     test_fraction: float = 0.2,
     seed: int = 42,
 ) -> dict[str, list[str]]:
-    """Return {"train": [...], "val": [...], "test": [...]} of sequence names."""
     seqs = list(seqs)
     rng = random.Random(seed)
 

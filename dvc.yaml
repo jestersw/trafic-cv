@@ -26,7 +26,6 @@ stages:
       - reports/eda/stats.json:
           cache: false
 
-  # Stage 2: detector. Run on a GPU machine (see notebooks/train_colab.ipynb).
   train_baseline:
     cmd: python -m traffic_cv.detection.train --exp baseline
     deps:
@@ -68,7 +67,6 @@ stages:
       - reports/detection/compare.md:
           cache: false
 
-  # Stage 3: tracking metrics on the test videos, same cached detections for both trackers.
   eval_tracking:
     cmd: python -m traffic_cv.tracking.evaluate --weights models/finetune.pt --trackers bytetrack sort
     deps:

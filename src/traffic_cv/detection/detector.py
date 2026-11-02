@@ -1,9 +1,3 @@
-"""Detector wrapper: one interface over PyTorch / ONNX / TensorRT weights.
-
-Ultralytics picks the backend from the file extension (.pt, .onnx, .engine, ...), so
-the rest of the pipeline only sees ``(N, 6)`` arrays: x1, y1, x2, y2, score, class_id.
-"""
-
 from __future__ import annotations
 
 import numpy as np
@@ -13,12 +7,12 @@ class Detector:
     def __init__(
         self,
         weights: str,
-        conf: float = 0.1,  # low on purpose: ByteTrack uses low-score boxes in stage 2
+        conf: float = 0.1,
         iou: float = 0.7,
         imgsz: int = 640,
         device: str | None = None,
         half: bool = False,
-        classes: list[str] | None = None,  # keep only these class names (e.g. for COCO)
+        classes: list[str] | None = None,
     ) -> None:
         from ultralytics import YOLO
 

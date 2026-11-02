@@ -28,7 +28,6 @@ def test_point_in_polygon():
 
 def test_line_counts_direction_and_class():
     lc = LineCounter((0, 300), (960, 300), NAMES)
-    # car 1 drives down (in), bus 2 drives up (out), car 3 never crosses
     for f in range(10):
         tracks = np.array(
             [
@@ -51,7 +50,7 @@ def test_line_ignores_crossing_beyond_segment():
 
 
 def test_line_count_once_suppresses_jitter():
-    ys = [290, 305, 295, 306, 294, 310, 320]  # anchor jitters across the line
+    ys = [290, 305, 295, 306, 294, 310, 320]
     once = LineCounter((0, 300), (960, 300), NAMES)
     every = LineCounter((0, 300), (960, 300), NAMES, count_once=False)
     for f, y in enumerate(ys):

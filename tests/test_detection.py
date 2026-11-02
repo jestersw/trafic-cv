@@ -14,9 +14,9 @@ CFG = yaml.safe_load(Path("configs/train.yaml").read_text())
 
 def test_resolve_config_merges_base_experiment_and_cli():
     args, aug = resolve_config(CFG, "finetune", {"epochs": 3, "device": None})
-    assert args["epochs"] == 3  # CLI wins
-    assert args["model"] == CFG["base"]["model"]  # base kept
-    assert args["fliplr"] == 0.5  # experiment override
+    assert args["epochs"] == 3
+    assert args["model"] == CFG["base"]["model"]
+    assert args["fliplr"] == 0.5
     assert args["name"] == "finetune" and args["exist_ok"] is True
     assert "augmentations" not in args and aug
 
@@ -32,7 +32,6 @@ def test_unknown_experiment():
 
 
 def test_finetune_augmentations_are_image_only():
-    """Ultralytics only keeps boxes in sync for spatial transforms we don't use; keep it so."""
     import albumentations as A
     import numpy as np
 
@@ -73,4 +72,4 @@ def test_compare_table_marks_best():
     t = compare_table(res)
     assert "| finetune | **0.7000** |" in t
     assert "| baseline | 0.6000 |" in t
-    assert "nan" in t  # baseline has no bus AP
+    assert "nan" in t

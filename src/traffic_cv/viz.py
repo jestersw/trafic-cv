@@ -1,5 +1,3 @@
-"""OpenCV overlay: boxes with class + ID, counting lines, zones, counters, FPS."""
-
 from __future__ import annotations
 
 import colorsys
@@ -11,7 +9,6 @@ from traffic_cv.events.counters import DwellZone, LineCounter
 
 
 def id_color(track_id: int) -> tuple[int, int, int]:
-    """Stable, well-spread BGR colour per track ID (golden-ratio hue walk)."""
     h = (track_id * 0.618033988749895) % 1.0
     r, g, b = colorsys.hsv_to_rgb(h, 0.75, 1.0)
     return int(b * 255), int(g * 255), int(r * 255)
@@ -64,7 +61,6 @@ def draw(
         cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
         _label(img, f"#{tid} {names.get(cls, cls)}", (x1, y1 - 2), color)
 
-    # counter panel
     rows = []
     if fps is not None:
         rows.append(f"FPS {fps:5.1f}   t={frame_idx / video_fps:6.1f}s")

@@ -1,26 +1,12 @@
-# Stage 1: UA-DETRAC -> YOLO conversion and video-level split.
-#
-# Expected raw layout (official UA-DETRAC release):
-#   data/raw/UA-DETRAC/
-#     Insight-MVT_Annotation_Train/MVI_20011/img00001.jpg ...
-#     Insight-MVT_Annotation_Test/MVI_39031/img00001.jpg ...
-#     DETRAC-Train-Annotations-XML/MVI_20011.xml ...
-#     DETRAC-Test-Annotations-XML/MVI_39031.xml ...
-
 raw_root: data/raw/UA-DETRAC
 out_root: data/processed/detrac
 
 sources:
-  - images: Insight-MVT_Annotation_Train
-    annotations: DETRAC-Train-Annotations-XML
+  - annotations: DETRAC-Train-Annotations-XML
     official_split: train
-  - images: Insight-MVT_Annotation_Test
-    annotations: DETRAC-Test-Annotations-XML
+  - annotations: DETRAC-Test-Annotations-XML
     official_split: test
 
-# UA-DETRAC labels only vehicles: car, bus, van, others (trucks, tankers, etc.).
-# There is no "person" class, so the final class list follows the dataset.
-# Keys are raw `vehicle_type` values, values are output class names.
 class_map:
   car: car
   bus: bus
@@ -29,26 +15,17 @@ class_map:
 classes: [car, bus, van, others]
 
 split:
-  # "official": official test sequences -> test, official train sequences split by video
-  #             into train/val. "random": pool all sequences and split by video.
   strategy: official
-  val_fraction: 0.15        # fraction of train *sequences* moved to val
-  test_fraction: 0.2        # only used with strategy=random
-  stratify_by: weather      # keep day/night/rain represented in every split
+  val_fraction: 0.15
+  test_fraction: 0.2
+  stratify_by: weather
   seed: 42
 
-# Neighbouring frames at 25 FPS are near-duplicates. Keeping every N-th frame cuts
-# disk/training time without losing much diversity. Test keeps every frame for the
-# tracking metrics (MOT export always uses all frames).
 frame_step:
   train: 5
   val: 10
   test: 10
 
-# UA-DETRAC marks "ignored regions" (far, unlabelled traffic). Painting them grey
-# prevents the detector being penalised for correct-but-unlabelled detections.
-# When false, images are symlinked instead of copied (saves disk).
 mask_ignored_regions: true
 
-# Drop boxes smaller than this (pixels, either side) — mostly unlabelled noise.
 min_box_side: 4

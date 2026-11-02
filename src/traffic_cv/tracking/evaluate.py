@@ -1,21 +1,3 @@
-"""Tracking metrics (MOTA, IDF1, ...) for ByteTrack vs SORT on UA-DETRAC MOT ground truth.
-
-Usage::
-
-    python -m traffic_cv.tracking.evaluate --weights models/finetune.pt \\
-        --mot-root data/processed/detrac/mot/test --trackers bytetrack sort
-
-The detector runs once per sequence and its detections are cached (``--dets-cache``), so
-every tracker sees exactly the same boxes. This isolates the comparison to the tracker,
-and lets you re-tune tracker parameters without a GPU.
-
-Protocol: class-agnostic (as in the UA-DETRAC MOT benchmark), IoU >= 0.5 for a match;
-GT and predicted boxes covered >= 50% by an *ignored region* are discarded on both sides.
-
-Writes ``<out>/metrics.json``, ``<out>/compare.md`` and MOT-format results in
-``<out>/<tracker>/<sequence>.txt``.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -31,9 +13,19 @@ import numpy as np
 from traffic_cv.tracking import build_tracker
 
 METRICS = [
-    "mota", "idf1", "motp", "precision", "recall", "num_switches", "num_false_positives",
-    "num_misses", "mostly_tracked", "mostly_lost", "num_unique_objects", "num_frames",
-]  # fmt: skip
+    "mota",
+    "idf1",
+    "motp",
+    "precision",
+    "recall",
+    "num_switches",
+    "num_false_positives",
+    "num_misses",
+    "mostly_tracked",
+    "mostly_lost",
+    "num_unique_objects",
+    "num_frames",
+]
 
 
 @dataclass
@@ -41,9 +33,8 @@ class MotSequence:
     name: str
     im_dir: Path
     length: int
-    # frame (1-based) -> (K, 5) array: id, x, y, w, h
     gt: dict[int, np.ndarray] = field(default_factory=dict)
-    ignored: np.ndarray = field(default_factory=lambda: np.empty((0, 4)))  # xyxy
+    ignored: np.ndarray = field(default_factory=lambda: np.empty((0, 4)))
 
     def frame_path(self, frame: int) -> Path:
         return self.im_dir / f"img{frame:05d}.jpg"
@@ -72,7 +63,6 @@ def load_mot_sequence(seq_dir: Path, repo_root: Path = Path(".")) -> MotSequence
 
 
 def _covered_by_ignored(xyxy: np.ndarray, ignored: np.ndarray, thr: float = 0.5) -> np.ndarray:
-    """Bool mask: box area fraction inside any ignored region >= thr."""
     if len(xyxy) == 0 or len(ignored) == 0:
         return np.zeros(len(xyxy), bool)
     a, r = xyxy[:, None, :], ignored[None, :, :]
@@ -85,7 +75,6 @@ def _covered_by_ignored(xyxy: np.ndarray, ignored: np.ndarray, thr: float = 0.5)
 def detect_sequence(
     detector: Callable[[np.ndarray], np.ndarray], seq: MotSequence, cache: Path | None = None
 ) -> list[np.ndarray]:
-    """Per-frame (N, 6) detections, index 0 = frame 1. Cached as .npz when ``cache`` is set."""
     cache_file = cache / f"{seq.name}.npz" if cache else None
     if cache_file and cache_file.exists():
         z = np.load(cache_file)
@@ -107,7 +96,6 @@ def detect_sequence(
 
 
 def run_tracker(tracker, dets: list[np.ndarray]) -> tuple[dict[int, np.ndarray], float]:
-    """Returns (frame -> (M, 7) tracks, mean ms per frame)."""
     tracker.reset()
     out: dict[int, np.ndarray] = {}
     t0 = time.perf_counter()

@@ -1,15 +1,4 @@
 #!/usr/bin/env python
-"""Detect, track and count traffic on a video.
-
-Examples::
-
-    python run.py --video input.mp4 --model yolo11s.pt --line 100,400,860,400
-    python run.py --video input.mp4 --model model.engine --line 100,400,860,400 \\
-        --tracker sort --zone "300,200;600,200;600,350;300,350" --dwell 5
-
-Outputs (default ``outputs/<video-stem>/``): annotated ``video.mp4``, ``events.csv``,
-``tracks.txt`` (MOTChallenge format) and ``summary.json`` with counts and FPS.
-"""
 
 from __future__ import annotations
 

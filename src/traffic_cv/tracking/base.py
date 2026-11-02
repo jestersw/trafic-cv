@@ -1,11 +1,3 @@
-"""Shared tracker types and helpers.
-
-Tracker I/O contract (same for every tracker, and for the Rust port):
-
-* input  ``dets``:   float array (N, 6) = x1, y1, x2, y2, score, class_id
-* output ``tracks``: float array (M, 7) = x1, y1, x2, y2, track_id, score, class_id
-"""
-
 from __future__ import annotations
 
 from collections import Counter
@@ -25,7 +17,6 @@ class Tracker(Protocol):
 
 
 def iou_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """Pairwise IoU between (N,4+) and (M,4+) xyxy boxes."""
     if len(a) == 0 or len(b) == 0:
         return np.zeros((len(a), len(b)))
     a, b = a[:, None, :4], b[None, :, :4]
@@ -40,7 +31,6 @@ def iou_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 def associate(
     track_boxes: np.ndarray, det_boxes: np.ndarray, iou_threshold: float
 ) -> tuple[list[tuple[int, int]], list[int], list[int]]:
-    """Hungarian matching on IoU. Returns (matches[(t,d)], unmatched_tracks, unmatched_dets)."""
     n_t, n_d = len(track_boxes), len(det_boxes)
     if n_t == 0 or n_d == 0:
         return [], list(range(n_t)), list(range(n_d))
@@ -57,9 +47,6 @@ def associate(
 
 
 class Track:
-    """A single tracked object. Class is a majority vote over matched detections,
-    which keeps per-class counts stable when the detector flips car<->van."""
-
     __slots__ = (
         "id",
         "kf",

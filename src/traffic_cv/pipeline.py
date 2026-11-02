@@ -1,5 +1,3 @@
-"""Video -> detections -> tracks -> events -> annotated video."""
-
 from __future__ import annotations
 
 import json
@@ -73,7 +71,7 @@ def run_video(
     trk_file = None
     if tracks_path:
         Path(tracks_path).parent.mkdir(parents=True, exist_ok=True)
-        trk_file = open(tracks_path, "w")  # MOTChallenge result format
+        trk_file = open(tracks_path, "w")
 
     stats = RunStats()
     recent: deque[float] = deque(maxlen=30)

@@ -30,7 +30,7 @@ export = [
     "onnx>=1.16",
     "onnxruntime>=1.18",
 ]
-data = ["dvc>=3.50"]
+data = ["dvc[s3]>=3.50", "gdown>=5.2"]
 
 [dependency-groups]
 dev = ["pytest>=8.0", "ruff>=0.6"]

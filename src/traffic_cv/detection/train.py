@@ -1,16 +1,3 @@
-"""Train a detector experiment from ``configs/train.yaml`` and log it to MLflow.
-
-Usage::
-
-    python -m traffic_cv.detection.train --exp baseline
-    python -m traffic_cv.detection.train --exp finetune --device 0 --epochs 50
-
-Outputs: ``runs/detect/<exp>/`` (Ultralytics run), ``models/<exp>.pt`` (best weights),
-``reports/detection/<exp>.json`` (test-split metrics). One MLflow run per experiment holds
-per-epoch metrics (Ultralytics' integration), the resolved config, the augmentation
-pipeline and the final test metrics.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -26,7 +13,6 @@ import yaml
 from traffic_cv.detection.augment import build_augmentations
 from traffic_cv.detection.evaluate import evaluate_weights
 
-# overrides accepted on the command line (type-converted by argparse)
 CLI_OVERRIDES = {
     "epochs": int,
     "batch": int,
@@ -46,7 +32,7 @@ def resolve_config(cfg: dict, exp: str, overrides: dict[str, Any]) -> tuple[dict
     args.update({k: v for k, v in overrides.items() if v is not None})
     aug_spec = args.pop("augmentations", None)
     args["name"] = exp
-    args["exist_ok"] = True  # rerunning an experiment overwrites it (DVC-friendly)
+    args["exist_ok"] = True
     return args, aug_spec
 
 
@@ -69,14 +55,13 @@ def train(
     augmentations = build_augmentations(aug_spec)
 
     ml = cfg.get("mlflow", {})
-    mlflow.set_tracking_uri(ml.get("tracking_uri", "sqlite:///mlflow.db"))
+    mlflow.set_tracking_uri(
+        os.environ.get("MLFLOW_TRACKING_URI") or ml.get("tracking_uri", "sqlite:///mlflow.db")
+    )
     experiment = ml.get("experiment", "traffic-cv-detection")
     mlflow.set_experiment(experiment)
-    # Ultralytics' callback calls set_experiment(project) unless this is set
     os.environ["MLFLOW_EXPERIMENT_NAME"] = experiment
 
-    # Start the run ourselves: Ultralytics' MLflow callback then logs into it and leaves
-    # it open, so test metrics land in the same run.
     with mlflow.start_run(run_name=exp) as run:
         mlflow.set_tags({"experiment": exp, "git_commit": _git_rev()})
         mlflow.log_dict({"args": args, "augmentations": aug_spec}, "train_config.yaml")

@@ -44,7 +44,6 @@ def test_split_official_is_disjoint_and_stratified():
     assert set(sp["test"]) == {f"te{i}" for i in range(5)}
     assert not set(sp["train"]) & set(sp["val"])
     assert len(sp["train"]) + len(sp["val"]) == 20
-    # one val sequence per weather stratum (5 per stratum * 0.2)
     weathers = {i.name: i.stratum for i in _infos()}
     assert sorted(weathers[n] for n in sp["val"]) == ["cloudy", "night", "rainy", "sunny"]
 
@@ -75,7 +74,6 @@ def test_convert_end_to_end(fake_detrac: Path, tmp_path: Path):
     assert len(split["train"]) + len(split["val"]) == 8
     assert split["val"]
 
-    # no sequence leaks across splits: every image of a sequence sits in one split dir
     for part, names in split.items():
         for name in names:
             imgs = list((out / "images" / part).glob(f"{name}_*.jpg"))
@@ -85,22 +83,69 @@ def test_convert_end_to_end(fake_detrac: Path, tmp_path: Path):
 
     train_seq = split["train"][0]
     lbls = sorted((out / "labels" / "train").glob(f"{train_seq}_*.txt"))
-    assert len(lbls) == 3  # 6 frames, step 2
+    assert len(lbls) == 3
     rows = lbls[0].read_text().strip().splitlines()
-    assert len(rows) == 2  # van inside ignored region dropped
+    assert len(rows) == 2
     assert rows[0].startswith("0 ") and rows[1].startswith("1 ")
 
-    # ignored region painted grey
     import cv2
 
     img = cv2.imread(str(next((out / "images" / "train").glob("*.jpg"))))
     assert abs(int(img[50, 880, 0]) - 114) <= 3
     assert abs(int(img[300, 300, 0]) - 200) <= 3
 
-    # MOT GT for test keeps every frame and all three tracks
     gt = (out / "mot" / "test" / split["test"][0] / "gt" / "gt.txt").read_text().splitlines()
     assert len(gt) == 6 * 3
 
     ds = yaml.safe_load((out / "dataset.yaml").read_text())
     assert ds["names"] == {0: "car", 1: "bus", 2: "van", 3: "others"}
     assert "path" not in ds
+
+
+def test_discover_official_drive_layout(tmp_path: Path):
+    from conftest import make_sequence
+
+    from traffic_cv.data.convert import discover
+
+    root = tmp_path / "UA-DETRAC"
+    make_sequence(
+        root, "DETRAC-Images", "nested/DETRAC-Train-Annotations-XML", "MVI_20011", "sunny"
+    )
+    make_sequence(root, "DETRAC-Images", "nested/DETRAC-Test-Annotations-XML", "MVI_39031", "night")
+    cfg = yaml.safe_load(Path("configs/data.yaml").read_text())
+    cfg["raw_root"] = str(root)
+
+    found = {info.name: (info.official_split, img_dir) for info, _, img_dir in discover(cfg)}
+    assert found == {
+        "MVI_20011": ("train", root / "DETRAC-Images" / "MVI_20011"),
+        "MVI_39031": ("test", root / "DETRAC-Images" / "MVI_39031"),
+    }
+
+
+def test_download_extracts_existing_archives(tmp_path: Path):
+    import zipfile
+
+    from traffic_cv.data.download import ARCHIVES
+    from traffic_cv.data.download import main as download_main
+
+    archives = tmp_path / "zips"
+    archives.mkdir()
+    for name in ARCHIVES:
+        with zipfile.ZipFile(archives / name, "w") as zf:
+            zf.writestr(f"{name[:-4]}/MVI_1.txt", "x")
+            zf.writestr("__MACOSX/junk", "x")
+    out = tmp_path / "raw"
+    download_main(["--out", str(out), "--archives", str(archives), "--no-download"])
+    assert sorted(p.name for p in out.iterdir()) == sorted(n[:-4] for n in ARCHIVES)
+
+
+def test_download_reports_missing_archives(tmp_path: Path, capsys):
+    import pytest
+
+    from traffic_cv.data.download import main as download_main
+
+    with pytest.raises(SystemExit):
+        download_main(
+            ["--out", str(tmp_path / "raw"), "--archives", str(tmp_path), "--no-download"]
+        )
+    assert "drive.google.com" in capsys.readouterr().out

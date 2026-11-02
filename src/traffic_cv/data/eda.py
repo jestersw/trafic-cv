@@ -1,12 +1,3 @@
-"""Exploratory data analysis of the converted dataset.
-
-Usage::
-
-    python -m traffic_cv.data.eda --data data/processed/detrac --out reports/eda
-
-Writes ``stats.json``, ``stats.md`` (tables pasted into the README) and plots.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -15,7 +6,6 @@ from pathlib import Path
 
 import yaml
 
-# COCO-style size buckets (by sqrt(area) in pixels)
 SIZE_BINS = [0, 32, 96, float("inf")]
 SIZE_LABELS = ["small (<32²)", "medium", "large (>96²)"]
 

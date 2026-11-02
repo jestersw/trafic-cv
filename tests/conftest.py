@@ -39,11 +39,10 @@ def make_sequence(
         targets = [
             TARGET_TMPL.format(tid=1, l=100 + 5 * num, t=300, w=80, h=60, vt="car"),
             TARGET_TMPL.format(tid=2, l=400, t=200, w=120, h=90, vt="bus"),
-            # inside the ignored region -> must be dropped when masking
             TARGET_TMPL.format(tid=3, l=820, t=10, w=40, h=30, vt="van"),
         ]
         frames.append(FRAME_TMPL.format(n=len(targets), num=num, targets="\n".join(targets)))
-    (root / ann_dir).mkdir(exist_ok=True)
+    (root / ann_dir).mkdir(parents=True, exist_ok=True)
     (root / ann_dir / f"{name}.xml").write_text(
         XML_TMPL.format(name=name, weather=weather, frames="\n".join(frames))
     )

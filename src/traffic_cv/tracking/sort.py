@@ -1,5 +1,3 @@
-"""SORT: Kalman filter + Hungarian IoU matching (Bewley et al., 2016)."""
-
 from __future__ import annotations
 
 import numpy as np
@@ -32,7 +30,6 @@ class SORT:
         dets = dets[dets[:, 4] >= self.min_score]
 
         predicted = np.array([t.predict() for t in self.tracks]).reshape(-1, 4)
-        # drop tracks whose prediction went numerically bad
         ok = np.isfinite(predicted).all(axis=1)
         self.tracks = [t for t, k in zip(self.tracks, ok, strict=True) if k]
         predicted = predicted[ok]

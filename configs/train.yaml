@@ -1,10 +1,5 @@
-# Stage 2: detector training. One shared base + named experiments that override it.
-#
-#   python -m traffic_cv.detection.train --exp baseline
-#   python -m traffic_cv.detection.train --exp finetune
-
 base:
-  model: yolo11s.pt                 # YOLO small, COCO-pretrained
+  model: yolo11s.pt
   data: data/processed/detrac/dataset.yaml
   epochs: 50
   imgsz: 640
@@ -18,34 +13,29 @@ base:
   plots: true
 
 experiments:
-  # Ultralytics defaults: its built-in mosaic/HSV/flip plus the stock, near-zero-probability
-  # Albumentations set. Nothing tuned for road footage.
   baseline:
     augmentations: null
 
-  # Same schedule + road/weather-specific photometric augmentations.
-  # Horizontal flip is done by Ultralytics (fliplr) because it must also flip the boxes;
-  # all transforms below are image-only, so boxes stay valid.
   finetune:
     fliplr: 0.5
     augmentations:
       - RandomBrightnessContrast: {brightness_limit: 0.3, contrast_limit: 0.3, p: 0.5}
-      - RandomGamma: {gamma_limit: [70, 140], p: 0.2}          # dusk / over-exposure
+      - RandomGamma: {gamma_limit: [70, 140], p: 0.2}
       - OneOf:
           p: 0.3
           transforms:
-            - MotionBlur: {blur_limit: 7}                       # fast vehicles, long exposure
+            - MotionBlur: {blur_limit: 7}
             - GaussianBlur: {blur_limit: [3, 5]}
             - Defocus: {radius: [1, 3]}
-      - GaussNoise: {std_range: [0.02, 0.08], p: 0.25}          # night sensor noise
-      - ImageCompression: {quality_range: [40, 90], p: 0.25}    # CCTV stream artefacts
+      - GaussNoise: {std_range: [0.02, 0.08], p: 0.25}
+      - ImageCompression: {quality_range: [40, 90], p: 0.25}
       - OneOf:
           p: 0.2
           transforms:
             - RandomRain: {drop_length: 12, blur_value: 3, brightness_coefficient: 0.85}
             - RandomFog: {fog_coef_range: [0.1, 0.3], alpha_coef: 0.08}
-      - ToGray: {p: 0.05}                                        # IR / monochrome cameras
+      - ToGray: {p: 0.05}
 
 mlflow:
-  tracking_uri: sqlite:///mlflow.db  # local DB; browse with `mlflow ui --backend-store-uri sqlite:///mlflow.db`
+  tracking_uri: sqlite:///mlflow.db
   experiment: traffic-cv-detection

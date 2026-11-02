@@ -18,8 +18,6 @@ def _make_video(path, n=40, w=320, h=240):
 
 
 class FakeDetector:
-    """Two cars moving down the frame, one of them at a lower confidence."""
-
     def __init__(self):
         self.f = 0
 

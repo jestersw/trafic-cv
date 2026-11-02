@@ -33,7 +33,7 @@ def test_bytetrack_survives_occlusion_sort_does_not():
     def run(tracker):
         ids = set()
         for f in range(40):
-            missing = 15 <= f < 20  # 5-frame full occlusion
+            missing = 15 <= f < 20
             dets = np.empty((0, 6)) if missing else np.array([det(50 + 6 * f, 200)])
             for r in tracker.update(dets):
                 ids.add(int(r[4]))
@@ -47,7 +47,7 @@ def test_bytetrack_uses_low_score_boxes():
     bt = ByteTrack()
     ids = set()
     for f in range(20):
-        score = 0.2 if 8 <= f < 12 else 0.9  # detector confidence drops (blur/occlusion)
+        score = 0.2 if 8 <= f < 12 else 0.9
         out = bt.update(np.array([det(50 + 6 * f, 200, score=score)]))
         assert len(out) == 1 or f == 0
         ids |= {int(r[4]) for r in out}
@@ -57,7 +57,7 @@ def test_bytetrack_uses_low_score_boxes():
 def test_class_majority_vote():
     bt = ByteTrack()
     for f in range(10):
-        cls = 2 if f == 5 else 0  # single misclassified frame
+        cls = 2 if f == 5 else 0
         out = bt.update(np.array([det(50 + 5 * f, 200, cls=cls)]))
     assert int(out[0, 6]) == 0
 

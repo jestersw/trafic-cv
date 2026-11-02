@@ -1,5 +1,3 @@
-"""Persist events as CSV or JSON Lines (format picked from the file extension)."""
-
 from __future__ import annotations
 
 import csv

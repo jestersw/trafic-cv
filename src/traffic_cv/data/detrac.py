@@ -1,26 +1,3 @@
-"""Parser for UA-DETRAC XML annotations.
-
-One XML file describes one sequence (video)::
-
-    <sequence name="MVI_20011">
-      <sequence_attribute camera_state="unstable" sence_weather="sunny"/>
-      <ignored_region>
-        <box left="778.75" top="24.75" width="181.75" height="63.5"/>
-      </ignored_region>
-      <frame density="7" num="1">
-        <target_list>
-          <target id="1">
-            <box left="592.75" top="378.8" width="160.05" height="162.2"/>
-            <attribute orientation="18.488" speed="6.859" trajectory_length="5"
-                       truncation_ratio="0.1" vehicle_type="car"/>
-          </target>
-        </target_list>
-      </frame>
-    </sequence>
-
-Note: ``sence_weather`` is the attribute name used by the dataset itself (sic).
-"""
-
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
@@ -33,8 +10,6 @@ IMAGE_HEIGHT = 540
 
 @dataclass(frozen=True, slots=True)
 class Box:
-    """Axis-aligned box in pixels, top-left + size (the DETRAC convention)."""
-
     left: float
     top: float
     width: float
@@ -65,7 +40,6 @@ class Sequence:
     weather: str
     camera_state: str
     ignored_regions: list[Box] = field(default_factory=list)
-    # frame number (1-based, matches imgNNNNN.jpg) -> targets
     frames: dict[int, list[Target]] = field(default_factory=dict)
 
     @property

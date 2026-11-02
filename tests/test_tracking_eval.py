@@ -87,3 +87,14 @@ def test_detect_sequence_missing_image_raises(tmp_path, missing_frame):
     seq, _ = _make_seq(tmp_path, n_frames=2)
     with pytest.raises(FileNotFoundError):
         detect_sequence(lambda img: np.empty((0, 6)), seq, None)
+
+
+def test_match_distances_threshold():
+    from traffic_cv.tracking.evaluate import match_distances
+
+    gt = np.array([[0, 0, 10, 10]], float)
+    hyp = np.array([[0, 0, 10, 10], [5, 0, 15, 10], [100, 100, 110, 110]], float)
+    d = match_distances(gt, hyp)
+    assert d[0, 0] == 0.0
+    assert np.isnan(d[0, 1]) and np.isnan(d[0, 2])
+    assert match_distances(np.empty((0, 4)), hyp).shape == (0, 3)

@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from traffic_cv.tracking import build_tracker
+from traffic_cv.tracking.base import iou_matrix
 
 METRICS = [
     "mota",
@@ -116,11 +117,16 @@ def accumulate(seq: MotSequence, hyp: dict[int, np.ndarray]):
 
         h = hyp.get(frame, np.empty((0, 7)))
         h = h[~_covered_by_ignored(h[:, :4], seq.ignored)] if len(h) else h
-        h_xywh = np.c_[h[:, :2], h[:, 2:4] - h[:, :2]] if len(h) else np.empty((0, 4))
-
-        dist = mm.distances.iou_matrix(g[:, 1:5], h_xywh, max_iou=0.5)
+        g_xyxy = np.c_[g[:, 1:3], g[:, 1:3] + g[:, 3:5]] if len(g) else np.empty((0, 4))
+        dist = match_distances(g_xyxy, h[:, :4] if len(h) else np.empty((0, 4)))
         acc.update(g[:, 0].astype(int).tolist(), h[:, 4].astype(int).tolist(), dist, frameid=frame)
     return acc
+
+
+def match_distances(gt_xyxy: np.ndarray, hyp_xyxy: np.ndarray, min_iou: float = 0.5) -> np.ndarray:
+    dist = 1.0 - iou_matrix(gt_xyxy, hyp_xyxy)
+    dist[dist > 1.0 - min_iou] = np.nan
+    return dist
 
 
 def write_mot(path: Path, hyp: dict[int, np.ndarray]) -> None:

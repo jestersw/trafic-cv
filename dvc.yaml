@@ -1,0 +1,83 @@
+stages:
+  convert:
+    cmd: python -m traffic_cv.data.convert --config configs/data.yaml
+    deps:
+      - data/raw/UA-DETRAC
+      - src/traffic_cv/data/detrac.py
+      - src/traffic_cv/data/split.py
+      - src/traffic_cv/data/convert.py
+    params:
+      - configs/data.yaml:
+    outs:
+      - data/processed/detrac
+
+  eda:
+    cmd: python -m traffic_cv.data.eda --data data/processed/detrac --out reports/eda
+    deps:
+      - data/processed/detrac/boxes.csv
+      - data/processed/detrac/sequences.csv
+      - src/traffic_cv/data/eda.py
+    outs:
+      - reports/eda/eda.png:
+          cache: false
+      - reports/eda/stats.md:
+          cache: false
+    metrics:
+      - reports/eda/stats.json:
+          cache: false
+
+  # Stage 2: detector. Run on a GPU machine (see notebooks/train_colab.ipynb).
+  train_baseline:
+    cmd: python -m traffic_cv.detection.train --exp baseline
+    deps:
+      - data/processed/detrac
+      - src/traffic_cv/detection
+    params:
+      - configs/train.yaml:
+          - base
+          - experiments.baseline
+    outs:
+      - models/baseline.pt
+    metrics:
+      - reports/detection/baseline.json:
+          cache: false
+
+  train_finetune:
+    cmd: python -m traffic_cv.detection.train --exp finetune
+    deps:
+      - data/processed/detrac
+      - src/traffic_cv/detection
+    params:
+      - configs/train.yaml:
+          - base
+          - experiments.finetune
+    outs:
+      - models/finetune.pt
+    metrics:
+      - reports/detection/finetune.json:
+          cache: false
+
+  compare_detection:
+    cmd: >-
+      python -m traffic_cv.detection.evaluate
+      --results reports/detection/baseline.json reports/detection/finetune.json
+    deps:
+      - reports/detection/baseline.json
+      - reports/detection/finetune.json
+    outs:
+      - reports/detection/compare.md:
+          cache: false
+
+  # Stage 3: tracking metrics on the test videos, same cached detections for both trackers.
+  eval_tracking:
+    cmd: python -m traffic_cv.tracking.evaluate --weights models/finetune.pt --trackers bytetrack sort
+    deps:
+      - models/finetune.pt
+      - data/processed/detrac
+      - src/traffic_cv/tracking
+    outs:
+      - reports/tracking/compare.md:
+          cache: false
+    metrics:
+      - reports/tracking/metrics.json:
+          cache: false

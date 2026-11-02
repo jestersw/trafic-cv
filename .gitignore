@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.pytest_cache/
+*.egg-info/
+.DS_Store
+
+# data & artifacts (versioned by DVC, not git)
+/data/raw/*
+!/data/raw/*.dvc
+/data/processed/
+/runs/
+/mlruns/
+/outputs/
+*.pt
+*.onnx
+*.engine
+*.mp4
+!tests/assets/*.mp4
+
+# rust
+/rust-infer/target/
+/mlflow.db
+/mlartifacts/

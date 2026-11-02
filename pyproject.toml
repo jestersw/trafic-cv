@@ -1,0 +1,57 @@
+[project]
+name = "traffic-cv"
+version = "0.1.0"
+description = "Detection, tracking and counting of road traffic on surveillance-camera video"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=1.26,<2.3",
+    "scipy>=1.11",
+    "opencv-python>=4.9",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+train = [
+    "ultralytics>=8.3",
+    "albumentations>=1.4",
+    "mlflow>=2.12",
+]
+track = [
+    "supervision>=0.25",
+    "motmetrics>=1.4",
+]
+eda = [
+    "pandas>=2.1",
+    "matplotlib>=3.8",
+]
+export = [
+    "onnx>=1.16",
+    "onnxruntime>=1.18",
+]
+data = ["dvc>=3.50"]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/traffic_cv"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "NPY"]
+ignore = ["SIM115"]  # writers keep files open across frames on purpose
+
+[tool.ruff.lint.per-file-ignores]
+"tests/conftest.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -2,4 +2,5 @@
     autostage = true
     remote = dagshub
 ['remote "dagshub"']
-    url = https://dagshub.com/jester/trafic-cv.dvc
+    url = s3://dvc
+    endpointurl = https://dagshub.com/jester/trafic-cv.s3

@@ -229,18 +229,18 @@ stages:
       size: 19155610
     - path: src/traffic_cv/tracking
       hash: md5
-      md5: f144c0d14bcf0770b8a416f756b10109.dir
-      size: 18619
+      md5: eff0955094279cf174264e2699eefebc.dir
+      size: 18771
       nfiles: 6
     outs:
     - path: reports/tracking/compare.md
       hash: md5
-      md5: 5d1c8cdd5fa334e14c72cca490ee3714
+      md5: 5c2db10c67dc1f9ba329c542695f0efa
       size: 302
     - path: reports/tracking/metrics.json
       hash: md5
-      md5: 7ac8ff058a8d74f6693ecea17fe65a52
-      size: 30272
+      md5: de6d4f36caa7db845b3dc9ea3f6fc032
+      size: 30273
   eval_counting:
     cmd: python -m traffic_cv.events.evaluate --config configs/counting.yaml 
       --weights models/finetune.pt
@@ -270,8 +270,8 @@ stages:
       nfiles: 5
     - path: src/traffic_cv/tracking
       hash: md5
-      md5: f144c0d14bcf0770b8a416f756b10109.dir
-      size: 18619
+      md5: eff0955094279cf174264e2699eefebc.dir
+      size: 18771
       nfiles: 6
     outs:
     - path: reports/counting/compare.md

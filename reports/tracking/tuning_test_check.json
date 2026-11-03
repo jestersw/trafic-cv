@@ -1,0 +1,48 @@
+{
+  "bytetrack": {
+    "default_test": {
+      "params": {},
+      "mota": 0.7329,
+      "idf1": 0.7994,
+      "id_switches": 1095,
+      "count_total_error": 0.0224,
+      "count_wape_direction": 0.123
+    },
+    "tuned_test": {
+      "params": {
+        "track_thresh": 0.7,
+        "match_iou": 0.3,
+        "low_thresh": 0.2,
+        "new_track_thresh": 0.7
+      },
+      "mota": 0.7213,
+      "idf1": 0.7976,
+      "id_switches": 530,
+      "count_total_error": 0.0927,
+      "count_wape_direction": 0.1521
+    }
+  },
+  "sort": {
+    "default_test": {
+      "params": {},
+      "mota": 0.7194,
+      "idf1": 0.7174,
+      "id_switches": 3826,
+      "count_total_error": 0.0364,
+      "count_wape_direction": 0.1515
+    },
+    "tuned_test": {
+      "params": {
+        "min_score": 0.5,
+        "max_age": 5,
+        "min_hits": 3,
+        "iou_threshold": 0.3
+      },
+      "mota": 0.7177,
+      "idf1": 0.7486,
+      "id_switches": 1986,
+      "count_total_error": 0.0915,
+      "count_wape_direction": 0.1545
+    }
+  }
+}

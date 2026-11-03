@@ -38,44 +38,48 @@ for kind in ("images", "labels"):
 Path("models").mkdir(exist_ok=True)
 shutil.copy2(src / "finetune.pt", "models/finetune.pt")
 
-sh(
-    sys.executable,
-    "-m",
-    "traffic_cv.export.export",
-    "--formats",
-    "onnx",
-    "onnx-int8",
-    "engine-fp16",
-    "engine-int8",
-    "--calib-dir",
-    str(data / "images/val"),
-    "--data",
-    str(data / "dataset.yaml"),
-    "--engine-fraction",
-    "0.25",
-)
-sh(
-    sys.executable,
-    "-m",
-    "traffic_cv.export.benchmark",
-    "--host",
-    "kaggle-t4",
-    "--data",
-    str(data / "dataset.yaml"),
-    "--frames-dir",
-    str(data / "images/test"),
-    "--models",
-    "models/finetune.pt@0",
-    "models/finetune.onnx@0",
-    "models/finetune_fp16.engine@0",
-    "models/finetune_int8.engine@0",
-    "models/finetune.onnx@cpu",
-    "models/finetune_int8.onnx@cpu",
-)
-
-OUT.mkdir(exist_ok=True)
-shutil.copy2("reports/export/kaggle-t4.json", OUT / "kaggle-t4.json")
-for f in Path("models").glob("finetune_*.engine"):
-    shutil.copy2(f, OUT / f.name)
-shutil.rmtree(WORK / "trafic-cv")
-print("done", sorted(p.name for p in OUT.iterdir()))
+try:
+    sh(
+        sys.executable,
+        "-m",
+        "traffic_cv.export.export",
+        "--formats",
+        "onnx",
+        "onnx-int8",
+        "engine-fp16",
+        "engine-int8",
+        "--calib-dir",
+        str(data / "images/val"),
+        "--data",
+        str(data / "dataset.yaml"),
+        "--engine-fraction",
+        "0.25",
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "traffic_cv.export.benchmark",
+            "--host",
+            "kaggle-t4",
+            "--data",
+            str(data / "dataset.yaml"),
+            "--frames-dir",
+            str(data / "images/test"),
+            "--models",
+            "models/finetune.pt@0",
+            "models/finetune_fp16.engine@0",
+            "models/finetune_int8.engine@0",
+            "models/finetune.onnx@cpu",
+            "models/finetune_int8.onnx@cpu",
+            "models/finetune.onnx@0",
+        ]
+    )
+finally:
+    OUT.mkdir(exist_ok=True)
+    for f in [Path("reports/export/kaggle-t4.json"), *Path("models").glob("finetune_*.engine")]:
+        if f.exists():
+            shutil.copy2(f, OUT / f.name)
+    os.chdir(WORK)
+    shutil.rmtree(WORK / "trafic-cv", ignore_errors=True)
+    print("done", sorted(p.name for p in OUT.iterdir()))

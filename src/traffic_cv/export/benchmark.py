@@ -152,15 +152,23 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--out", default="reports/export")
     args = ap.parse_args(argv)
 
-    results = []
-    for entry in args.models:
-        r = benchmark(entry, args)
-        print(json.dumps(r))
-        results.append(r)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    results, failed = [], {}
+    for entry in args.models:
+        try:
+            r = benchmark(entry, args)
+        except Exception as e:
+            failed[entry] = f"{type(e).__name__}: {str(e)[:300]}"
+            print("FAILED", entry, failed[entry])
+            continue
+        print(json.dumps(r))
+        results.append(r)
+        (out / f"{args.host}.json").write_text(
+            json.dumps({"host": args.host, "results": results, "failed": failed}, indent=2)
+        )
     (out / f"{args.host}.json").write_text(
-        json.dumps({"host": args.host, "results": results}, indent=2)
+        json.dumps({"host": args.host, "results": results, "failed": failed}, indent=2)
     )
     rows = collect(out)
     ref_map = args.ref_map

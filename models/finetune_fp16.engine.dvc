@@ -1,0 +1,5 @@
+outs:
+- md5: 741be7acdd6d32d7fc36f8be0c3d2c38
+  size: 99403101
+  hash: md5
+  path: finetune_fp16.engine

@@ -7,12 +7,12 @@
       "device": "mps",
       "size_mb": 18.3,
       "latency": {
-        "preprocess_ms": 0.6,
-        "inference_ms": 2.69,
-        "postprocess_ms": 5.09,
-        "total_ms": 8.38,
-        "fps": 119.3,
-        "inference_fps": 371.1
+        "preprocess_ms": 0.63,
+        "inference_ms": 2.26,
+        "postprocess_ms": 5.37,
+        "total_ms": 8.26,
+        "fps": 121.1,
+        "inference_fps": 442.4
       },
       "map50": 0.6819,
       "map50_95": 0.4924
@@ -23,12 +23,12 @@
       "device": "cpu",
       "size_mb": 18.3,
       "latency": {
-        "preprocess_ms": 0.66,
-        "inference_ms": 33.31,
-        "postprocess_ms": 0.22,
-        "total_ms": 34.19,
-        "fps": 29.2,
-        "inference_fps": 30.0
+        "preprocess_ms": 0.57,
+        "inference_ms": 28.19,
+        "postprocess_ms": 0.19,
+        "total_ms": 28.95,
+        "fps": 34.5,
+        "inference_fps": 35.5
       },
       "map50": 0.6819,
       "map50_95": 0.4924
@@ -39,12 +39,12 @@
       "device": "cpu",
       "size_mb": 36.2,
       "latency": {
-        "preprocess_ms": 1.42,
-        "inference_ms": 31.6,
-        "postprocess_ms": 0.43,
-        "total_ms": 33.45,
-        "fps": 29.9,
-        "inference_fps": 31.6
+        "preprocess_ms": 0.85,
+        "inference_ms": 31.79,
+        "postprocess_ms": 0.29,
+        "total_ms": 32.93,
+        "fps": 30.4,
+        "inference_fps": 31.5
       },
       "parity": {
         "ref_boxes": 828,
@@ -61,12 +61,12 @@
       "device": "cpu",
       "size_mb": 12.0,
       "latency": {
-        "preprocess_ms": 1.48,
-        "inference_ms": 32.59,
-        "postprocess_ms": 0.49,
-        "total_ms": 34.56,
-        "fps": 28.9,
-        "inference_fps": 30.7
+        "preprocess_ms": 0.83,
+        "inference_ms": 25.15,
+        "postprocess_ms": 0.26,
+        "total_ms": 26.23,
+        "fps": 38.1,
+        "inference_fps": 39.8
       },
       "parity": {
         "ref_boxes": 828,
@@ -77,5 +77,6 @@
       "map50": 0.6803,
       "map50_95": 0.4838
     }
-  ]
+  ],
+  "failed": {}
 }

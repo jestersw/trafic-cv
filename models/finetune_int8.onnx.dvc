@@ -1,0 +1,5 @@
+outs:
+- md5: 3ab2a305c75f92cb4a342e34923fb7ab
+  size: 12532760
+  hash: md5
+  path: finetune_int8.onnx

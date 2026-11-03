@@ -1,4 +1,4 @@
-FROM rust:1-bookworm AS build
+FROM rust:1-trixie AS build
 RUN apt-get update \
     && apt-get install -y --no-install-recommends clang libclang-dev libopencv-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -7,10 +7,10 @@ COPY rust-infer ./
 RUN cargo build --release -p traffic-infer \
     && cp target/release/traffic-infer /traffic-infer
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
-       libopencv-core406 libopencv-imgproc406 libopencv-videoio406 libopencv-imgcodecs406 \
+       libopencv-core410 libopencv-imgproc410 libopencv-videoio410 libopencv-imgcodecs410 \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /traffic-infer /usr/local/bin/traffic-infer
 WORKDIR /work

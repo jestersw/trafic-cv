@@ -23,3 +23,5 @@ __pycache__/
 /rust-infer/target/
 /mlflow.db
 /mlartifacts/
+/reports/tracking/bytetrack/
+/reports/tracking/sort/

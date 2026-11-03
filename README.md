@@ -151,7 +151,7 @@
 
 ## Как запустить
 
-Нужны Python 3.11+, [uv](https://docs.astral.sh/uv/), для Rust — `rustup`, OpenCV 4.x/5.x и clang.
+Нужны Python 3.11+ и [uv](https://docs.astral.sh/uv/). Для Rust — `rustup`, OpenCV 4.x/5.x и libclang: на macOS `brew install opencv llvm pkg-config`, на Debian/Ubuntu `apt install libopencv-dev clang libclang-dev`.
 
 ### 1. Установка
 
@@ -201,12 +201,12 @@ uv run python -m traffic_cv.events.evaluate --weights models/finetune.pt
 ### 5. Запуск на видео
 
 ```bash
-uv run python run.py --video input.mp4 --model models/finetune.pt --line 0,324,960,324
+uv run python run.py --video input.mp4 --model models/finetune.pt --line 0,324,960,324 --device 0
 uv run python run.py --video input.mp4 --model models/finetune_fp16.engine --line 0,324,960,324 \
     --zone "480,380;960,380;960,540;480,540" --dwell 5 --tracker bytetrack
 ```
 
-Вместо файла можно передать последовательность кадров: `--video "data/raw/UA-DETRAC/DETRAC-Images/MVI_39031/img%05d.jpg"`. Результат в `outputs/<имя>/`: `video.mp4`, `events.csv`, `tracks.txt` (формат MOT) и `summary.json` со счётчиками и задержками. Линия задаётся как `x1,y1,x2,y2` в пикселях кадра. Направление `in` — переход на ту сторону, куда указывает нормаль слева направо вдоль линии (для горизонтальной линии слева направо — сверху вниз).
+`--device`: `0` — NVIDIA GPU, `mps` — Apple GPU, `cpu`; без него Ultralytics выбирает CUDA, если она есть, иначе CPU. Для проверки без своих видео подойдёт демо-ролик `assets/demo.mp4`. Вместо файла можно передать последовательность кадров: `--video "data/raw/UA-DETRAC/DETRAC-Images/MVI_39031/img%05d.jpg"`. Результат в `outputs/<имя>/`: `video.mp4`, `events.csv`, `tracks.txt` (формат MOT) и `summary.json` со счётчиками и задержками. Линия задаётся как `x1,y1,x2,y2` в пикселях кадра. Направление `in` — переход на ту сторону, куда указывает нормаль слева направо вдоль линии (для горизонтальной линии слева направо — сверху вниз).
 
 ### 6. Экспорт и бенчмарк
 
@@ -231,11 +231,12 @@ docker run --gpus all --rm -v $PWD/models:/app/models -v $PWD/outputs:/app/outpu
 
 ```bash
 cd rust-infer
+export DYLD_FALLBACK_LIBRARY_PATH="$(brew --prefix llvm)/lib"
 cargo test -p traffic-core
 cargo run --release -- --video input.mp4 --model ../models/finetune.onnx --line 0,324,960,324 --out-dir ../outputs/rust
 ```
 
-Флаги `--ep cuda|tensorrt|coreml` включаются фичами при сборке (`cargo build --release --features tensorrt`). `--dump-dets` пишет детекции по кадрам для сверки с Python:
+Строка с `DYLD_FALLBACK_LIBRARY_PATH` нужна только на macOS: без неё крейт `opencv` не находит `libclang` при сборке. Флаги `--ep cuda|tensorrt|coreml` включаются фичами при сборке (`cargo build --release --features tensorrt`). `--dump-dets` пишет детекции по кадрам для сверки с Python:
 
 ```bash
 uv run python -m traffic_cv.export.compare_rust

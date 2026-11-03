@@ -1,0 +1,32 @@
+{
+  "weights": "models/finetune.pt",
+  "split": "test",
+  "map50": 0.6819,
+  "map50_95": 0.4924,
+  "precision": 0.7179,
+  "recall": 0.664,
+  "per_class": {
+    "car": {
+      "ap50": 0.9047,
+      "ap50_95": 0.6485
+    },
+    "bus": {
+      "ap50": 0.8411,
+      "ap50_95": 0.5838
+    },
+    "van": {
+      "ap50": 0.5823,
+      "ap50_95": 0.4411
+    },
+    "others": {
+      "ap50": 0.3995,
+      "ap50_95": 0.2964
+    }
+  },
+  "speed_ms": {
+    "preprocess": 0.09,
+    "inference": 0.38,
+    "loss": 0.0,
+    "postprocess": 7.31
+  }
+}

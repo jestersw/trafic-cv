@@ -125,3 +125,119 @@ stages:
       hash: md5
       md5: 346da9f4bb46f9e4877d91c1baa34427
       size: 536
+  train_finetune:
+    cmd: python -m traffic_cv.detection.train --exp finetune
+    deps:
+    - path: data/processed/detrac
+      hash: md5
+      md5: 0990f7d41212c356185c9b46a9cd4869.dir
+      size: 2412111390
+      nfiles: 42347
+    - path: src/traffic_cv/detection
+      hash: md5
+      md5: 89fddf8f23a5f0ac86e9f3782d7673d7.dir
+      size: 9585
+      nfiles: 5
+    params:
+      configs/train.yaml:
+        base:
+          model: yolo11s.pt
+          data: data/processed/detrac/dataset.yaml
+          epochs: 50
+          imgsz: 640
+          batch: 16
+          patience: 15
+          workers: 8
+          seed: 42
+          deterministic: true
+          cos_lr: true
+          project: runs/detect
+          plots: true
+        experiments.finetune:
+          epochs: 35
+          workers: 4
+          fliplr: 0.5
+          augmentations:
+          - RandomBrightnessContrast:
+              brightness_limit: 0.3
+              contrast_limit: 0.3
+              p: 0.5
+          - RandomGamma:
+              gamma_limit:
+              - 70
+              - 140
+              p: 0.2
+          - OneOf:
+              p: 0.3
+              transforms:
+              - MotionBlur:
+                  blur_limit: 7
+              - GaussianBlur:
+                  blur_limit:
+                  - 3
+                  - 5
+          - GaussNoise:
+              std_range:
+              - 0.02
+              - 0.08
+              p: 0.25
+          - ToGray:
+              p: 0.05
+    outs:
+    - path: models/finetune.pt
+      hash: md5
+      md5: ac7742f52a8738b89fb35783fc5377eb
+      size: 19155610
+    - path: reports/detection/finetune.json
+      hash: md5
+      md5: f89fc79c31043e3cdc9e5da5557ea352
+      size: 536
+  compare_detection:
+    cmd: python -m traffic_cv.detection.evaluate --results 
+      reports/detection/baseline.json reports/detection/finetune.json
+    deps:
+    - path: reports/detection/baseline.json
+      hash: md5
+      md5: 346da9f4bb46f9e4877d91c1baa34427
+      size: 536
+    - path: reports/detection/finetune.json
+      hash: md5
+      md5: f89fc79c31043e3cdc9e5da5557ea352
+      size: 536
+    outs:
+    - path: reports/detection/compare.md
+      hash: md5
+      md5: 4ae8f04daec3bca7d319c78b3da61287
+      size: 316
+  eval_tracking:
+    cmd: python -m traffic_cv.tracking.evaluate --weights models/finetune.pt 
+      --trackers bytetrack sort
+    deps:
+    - path: data/processed/detrac
+      hash: md5
+      md5: 0990f7d41212c356185c9b46a9cd4869.dir
+      size: 2412111390
+      nfiles: 42347
+    - path: data/raw/UA-DETRAC/DETRAC-Images
+      hash: md5
+      md5: f20c7f3810a3395a62bbf38bfd72600c.dir
+      size: 9842424283
+      nfiles: 140131
+    - path: models/finetune.pt
+      hash: md5
+      md5: ac7742f52a8738b89fb35783fc5377eb
+      size: 19155610
+    - path: src/traffic_cv/tracking
+      hash: md5
+      md5: 3c2050bc7594c6d7e63ca8ccfedb6a8c.dir
+      size: 18620
+      nfiles: 6
+    outs:
+    - path: reports/tracking/compare.md
+      hash: md5
+      md5: 10ef8188bcfd1669041bd52635fe03ca
+      size: 302
+    - path: reports/tracking/metrics.json
+      hash: md5
+      md5: 750392987e58f7ec657d12544829b584
+      size: 30273

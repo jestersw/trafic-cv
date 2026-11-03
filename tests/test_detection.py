@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 import yaml
 
@@ -73,3 +74,13 @@ def test_compare_table_marks_best():
     assert "| finetune | **0.7000** |" in t
     assert "| baseline | 0.6000 |" in t
     assert "nan" in t
+
+
+def test_haze_is_cheap_and_denser_at_top():
+    from traffic_cv.detection.augment import build_transform
+
+    t = build_transform({"Haze": {"strength": [0.4, 0.4], "falloff": [0.9, 0.9], "p": 1.0}})
+    img = np.zeros((100, 50, 3), dtype=np.uint8)
+    out = t(image=img)["image"]
+    assert out.shape == img.shape and out.dtype == np.uint8
+    assert out[0].mean() > out[-1].mean() > 0

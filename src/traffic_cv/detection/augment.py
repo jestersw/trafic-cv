@@ -16,7 +16,12 @@ def build_transform(spec: dict[str, Any]):
         raise ValueError(f"each augmentation must be a single-key mapping, got {spec}")
     ((name, kwargs),) = spec.items()
     kwargs = dict(kwargs or {})
-    cls = getattr(A, name, None)
+    if name == "Haze":
+        from traffic_cv.detection.haze import Haze
+
+        cls = Haze
+    else:
+        cls = getattr(A, name, None)
     if cls is None:
         raise ValueError(f"unknown Albumentations transform {name!r}")
     if name in COMPOSITIONS:

@@ -31,6 +31,26 @@ experiments:
       - GaussNoise: {std_range: [0.02, 0.08], p: 0.25}
       - ToGray: {p: 0.05}
 
+  finetune_v2:
+    epochs: 50
+    workers: 4
+    fliplr: 0.5
+    augmentations:
+      - RandomBrightnessContrast: {brightness_limit: 0.3, contrast_limit: 0.3, p: 0.5}
+      - RandomGamma: {gamma_limit: [70, 140], p: 0.2}
+      - OneOf:
+          p: 0.3
+          transforms:
+            - MotionBlur: {blur_limit: 7}
+            - GaussianBlur: {blur_limit: [3, 5]}
+      - GaussNoise: {std_range: [0.02, 0.08], p: 0.25}
+      - OneOf:
+          p: 0.25
+          transforms:
+            - RandomRain: {drop_length: 12, blur_value: 3, brightness_coefficient: 0.85}
+            - Haze: {strength: [0.15, 0.45], falloff: [0.3, 0.9]}
+      - ToGray: {p: 0.05}
+
 mlflow:
   tracking_uri: sqlite:///mlflow.db
   experiment: traffic-cv-detection

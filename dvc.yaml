@@ -56,6 +56,21 @@ stages:
       - reports/detection/finetune.json:
           cache: false
 
+  train_finetune_v2:
+    cmd: python -m traffic_cv.detection.train --exp finetune_v2
+    deps:
+      - data/processed/detrac
+      - src/traffic_cv/detection
+    params:
+      - configs/train.yaml:
+          - base
+          - experiments.finetune_v2
+    outs:
+      - models/finetune_v2.pt
+    metrics:
+      - reports/detection/finetune_v2.json:
+          cache: false
+
   compare_detection:
     cmd: >-
       python -m traffic_cv.detection.evaluate

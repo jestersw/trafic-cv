@@ -43,7 +43,7 @@ def _make_seq(tmp_path: Path, n_frames=60, occlude=range(25, 31)) -> tuple[MotSe
 def test_load_mot_sequence(tmp_path):
     seq, _ = _make_seq(tmp_path)
     assert seq.length == 60
-    assert seq.gt[1].shape == (2, 5)
+    assert seq.gt[1].shape == (2, 8)
     assert seq.ignored.shape == (1, 4)
 
 

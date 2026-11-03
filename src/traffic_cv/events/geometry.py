@@ -12,6 +12,16 @@ def side(p1: Point, p2: Point, q: Point, eps: float = 1e-9) -> int:
     return 0 if abs(c) <= eps else (1 if c > 0 else -1)
 
 
+def signed_distance(p1: Point, p2: Point, q: Point) -> float:
+    length = ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
+    return cross(p1, p2, q) / max(length, 1e-9)
+
+
+def projection(p1: Point, p2: Point, q: Point) -> float:
+    dx, dy = p2[0] - p1[0], p2[1] - p1[1]
+    return ((q[0] - p1[0]) * dx + (q[1] - p1[1]) * dy) / max(dx * dx + dy * dy, 1e-9)
+
+
 def segments_intersect(a1: Point, a2: Point, b1: Point, b2: Point) -> bool:
     d1, d2 = side(b1, b2, a1), side(b1, b2, a2)
     d3, d4 = side(a1, a2, b1), side(a1, a2, b2)

@@ -55,7 +55,7 @@ def load_mot_sequence(seq_dir: Path, repo_root: Path = Path(".")) -> MotSequence
         np.loadtxt(gt_path, delimiter=",", ndmin=2) if gt_path.stat().st_size else np.empty((0, 9))
     )
     for frame in np.unique(raw[:, 0]).astype(int):
-        seq.gt[int(frame)] = raw[raw[:, 0] == frame][:, 1:6]
+        seq.gt[int(frame)] = raw[raw[:, 0] == frame][:, 1:]
 
     ign = seq_dir / "ignored_regions.json"
     if ign.exists():

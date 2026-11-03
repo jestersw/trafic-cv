@@ -229,15 +229,56 @@ stages:
       size: 19155610
     - path: src/traffic_cv/tracking
       hash: md5
-      md5: 3c2050bc7594c6d7e63ca8ccfedb6a8c.dir
-      size: 18620
+      md5: f144c0d14bcf0770b8a416f756b10109.dir
+      size: 18619
       nfiles: 6
     outs:
     - path: reports/tracking/compare.md
       hash: md5
-      md5: 10ef8188bcfd1669041bd52635fe03ca
+      md5: 5d1c8cdd5fa334e14c72cca490ee3714
       size: 302
     - path: reports/tracking/metrics.json
       hash: md5
-      md5: 750392987e58f7ec657d12544829b584
-      size: 30273
+      md5: 7ac8ff058a8d74f6693ecea17fe65a52
+      size: 30272
+  eval_counting:
+    cmd: python -m traffic_cv.events.evaluate --config configs/counting.yaml 
+      --weights models/finetune.pt
+    deps:
+    - path: configs/counting.yaml
+      hash: md5
+      md5: 5814fe972b66e46f5565810c4d2198c8
+      size: 1693
+    - path: data/processed/detrac
+      hash: md5
+      md5: 0990f7d41212c356185c9b46a9cd4869.dir
+      size: 2412111390
+      nfiles: 42347
+    - path: data/raw/UA-DETRAC/DETRAC-Images
+      hash: md5
+      md5: f20c7f3810a3395a62bbf38bfd72600c.dir
+      size: 9842424283
+      nfiles: 140131
+    - path: models/finetune.pt
+      hash: md5
+      md5: ac7742f52a8738b89fb35783fc5377eb
+      size: 19155610
+    - path: src/traffic_cv/events
+      hash: md5
+      md5: 9361b47fb6ad2e2fadf00f89a48ab509.dir
+      size: 17053
+      nfiles: 5
+    - path: src/traffic_cv/tracking
+      hash: md5
+      md5: f144c0d14bcf0770b8a416f756b10109.dir
+      size: 18619
+      nfiles: 6
+    outs:
+    - path: reports/counting/compare.md
+      hash: md5
+      md5: 9bcce4c3ca8c02c084b2ee22c120afd1
+      size: 2019
+    - path: reports/counting/metrics.json
+      hash: md5
+      md5: adf189ab2632b5f399d73e9dac996458
+      size: 63876

@@ -80,3 +80,19 @@ stages:
     metrics:
       - reports/tracking/metrics.json:
           cache: false
+
+  eval_counting:
+    cmd: python -m traffic_cv.events.evaluate --config configs/counting.yaml --weights models/finetune.pt
+    deps:
+      - models/finetune.pt
+      - data/processed/detrac
+      - data/raw/UA-DETRAC/DETRAC-Images
+      - src/traffic_cv/events
+      - src/traffic_cv/tracking
+      - configs/counting.yaml
+    outs:
+      - reports/counting/compare.md:
+          cache: false
+    metrics:
+      - reports/counting/metrics.json:
+          cache: false

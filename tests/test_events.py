@@ -93,3 +93,11 @@ def test_event_writer_csv_and_jsonl(tmp_path):
         w.write(events)
     d = json.loads((tmp_path / "e.jsonl").read_text().splitlines()[0])
     assert d["track_id"] == 1 and d["frame"] == events[0].frame
+
+
+def test_line_margin_ignores_jitter_near_line():
+    ys = [280, 305, 295, 306, 294, 330]
+    lc = LineCounter((0, 300), (960, 300), NAMES, count_once=False, margin=10)
+    for f, y in enumerate(ys):
+        lc.update(np.array([trk(7, 100, y)]), f, 25.0)
+    assert (lc.total_in, lc.total_out) == (1, 0)

@@ -576,7 +576,7 @@
         "num_frames": 1710
       }
     },
-    "tracker_ms_per_frame": 0.264
+    "tracker_ms_per_frame": 0.23
   },
   "sort": {
     "overall": {
@@ -1155,7 +1155,7 @@
         "num_frames": 1710
       }
     },
-    "tracker_ms_per_frame": 0.231
+    "tracker_ms_per_frame": 0.223
   },
   "_meta": {
     "weights": "models/finetune.pt",

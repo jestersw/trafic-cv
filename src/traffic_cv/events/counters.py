@@ -5,7 +5,13 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 
-from traffic_cv.events.geometry import Point, anchor, point_in_polygon, segments_intersect, side
+from traffic_cv.events.geometry import (
+    Point,
+    anchor,
+    point_in_polygon,
+    projection,
+    signed_distance,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,16 +38,18 @@ class LineCounter:
         name: str = "line",
         anchor_mode: str = "bottom_center",
         count_once: bool = True,
+        margin: float = 0.0,
     ) -> None:
         self.p1, self.p2 = (float(p1[0]), float(p1[1])), (float(p2[0]), float(p2[1]))
         self.names = dict(enumerate(class_names)) if isinstance(class_names, list) else class_names
         self.name = name
         self.anchor_mode = anchor_mode
         self.count_once = count_once
+        self.margin = margin
         self.reset()
 
     def reset(self) -> None:
-        self._last: dict[int, Point] = {}
+        self._side: dict[int, int] = {}
         self._counted: set[int] = set()
         self.counts: dict[str, dict[str, int]] = defaultdict(lambda: {"in": 0, "out": 0})
 
@@ -58,15 +66,13 @@ class LineCounter:
         for row in np.asarray(tracks).reshape(-1, 7):
             tid, cls = int(row[4]), int(row[6])
             cur = anchor(row, self.anchor_mode)
-            prev = self._last.get(tid)
-            self._last[tid] = cur
-            if prev is None or (self.count_once and tid in self._counted):
+            d = signed_distance(self.p1, self.p2, cur)
+            if abs(d) <= self.margin or not 0.0 <= projection(self.p1, self.p2, cur) <= 1.0:
                 continue
-            if not segments_intersect(prev, cur, self.p1, self.p2):
-                continue
-            s_cur = side(self.p1, self.p2, cur)
-            if s_cur == 0:
-                self._last[tid] = prev
+            s_cur = 1 if d > 0 else -1
+            prev = self._side.get(tid)
+            self._side[tid] = s_cur
+            if prev is None or prev == s_cur or (self.count_once and tid in self._counted):
                 continue
             direction = "in" if s_cur > 0 else "out"
             cname = self.names.get(cls, str(cls))

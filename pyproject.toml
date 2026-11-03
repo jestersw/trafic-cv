@@ -29,6 +29,7 @@ eda = [
 export = [
     "onnx>=1.16",
     "onnxruntime>=1.18",
+    "onnxslim>=0.1.71",
 ]
 data = ["dvc[s3]>=3.50", "gdown>=5.2"]
 

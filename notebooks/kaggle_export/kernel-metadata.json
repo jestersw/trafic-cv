@@ -1,0 +1,13 @@
+{
+  "id": "jestersw/traffic-cv-export-trt",
+  "title": "traffic-cv export trt",
+  "code_file": "export_trt.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["jestersw/traffic-cv-export"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

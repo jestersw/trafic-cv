@@ -6,6 +6,8 @@ import argparse
 import json
 from pathlib import Path
 
+from traffic_cv.tracking import TRACKERS
+
 
 def parse_line(s: str) -> tuple[tuple[float, float], tuple[float, float]]:
     v = [float(x) for x in s.split(",")]
@@ -40,7 +42,7 @@ def main(argv: list[str] | None = None) -> dict:
         help='no-stopping zone "x,y;x,y;x,y;..." (repeatable)',
     )
     ap.add_argument("--dwell", type=float, default=5.0, help="seconds allowed in a zone")
-    ap.add_argument("--tracker", default="bytetrack", choices=["bytetrack", "sort"])
+    ap.add_argument("--tracker", default="bytetrack", choices=sorted(TRACKERS))
     ap.add_argument("--conf", type=float, default=0.1)
     ap.add_argument("--imgsz", type=int, default=640)
     ap.add_argument("--device", default=None, help="e.g. 0, cpu, mps")

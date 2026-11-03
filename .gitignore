@@ -25,3 +25,4 @@ __pycache__/
 /mlartifacts/
 /reports/tracking/bytetrack/
 /reports/tracking/sort/
+/trt_cache/

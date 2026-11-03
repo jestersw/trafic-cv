@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import resource
+import sys
 import time
 from collections import deque
 from collections.abc import Callable
@@ -22,6 +24,7 @@ class RunStats:
     seconds: float = 0.0
     det_ms: list[float] = field(default_factory=list)
     trk_ms: list[float] = field(default_factory=list)
+    frame_ms: list[float] = field(default_factory=list)
 
     @property
     def fps(self) -> float:
@@ -37,7 +40,15 @@ class RunStats:
             "detector_ms_p50": pct(self.det_ms, 50),
             "detector_ms_p95": pct(self.det_ms, 95),
             "tracker_ms_p50": pct(self.trk_ms, 50),
+            "frame_ms_p50": pct(self.frame_ms, 50),
+            "frame_ms_p95": pct(self.frame_ms, 95),
+            "peak_rss_mb": peak_rss_mb(),
         }
+
+
+def peak_rss_mb() -> float:
+    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return round(rss / 2**20 if sys.platform == "darwin" else rss / 1024, 2)
 
 
 def run_video(
@@ -122,6 +133,7 @@ def run_video(
                     cv2.imshow("traffic-cv", frame)
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
+                stats.frame_ms.append((time.perf_counter() - t0) * 1e3)
                 bar.update()
     finally:
         stats.frames = frame_idx

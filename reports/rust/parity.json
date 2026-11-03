@@ -1,0 +1,82 @@
+{
+  "detections": {
+    "frames": 300,
+    "python_boxes": 1556,
+    "rust_boxes": 1559,
+    "matched": 0.9961,
+    "mean_iou": 0.9825,
+    "max_coord_diff_px": 4.71,
+    "p99_coord_diff_px": 0.73
+  },
+  "same_counts": true,
+  "python": {
+    "video": "data/raw/UA-DETRAC/DETRAC-Images/MVI_39031/img%05d.jpg",
+    "counts": {
+      "line1": {
+        "car": {
+          "in": 22,
+          "out": 15
+        },
+        "van": {
+          "in": 1,
+          "out": 1
+        }
+      }
+    },
+    "totals": {
+      "line1": {
+        "in": 23,
+        "out": 16
+      }
+    },
+    "perf": {
+      "frames": 1470,
+      "fps_end_to_end": 21.82,
+      "detector_ms_p50": 38.27,
+      "detector_ms_p95": 40.83,
+      "tracker_ms_p50": 0.34,
+      "frame_ms_p50": 43.54,
+      "frame_ms_p95": 46.46,
+      "peak_rss_mb": 686.94
+    },
+    "model": "models/finetune.onnx",
+    "tracker": "bytetrack"
+  },
+  "rust": {
+    "counts": {
+      "line1": {
+        "car": {
+          "in": 22,
+          "out": 15
+        },
+        "van": {
+          "in": 1,
+          "out": 1
+        }
+      }
+    },
+    "ep": "cpu",
+    "model": "models/finetune.onnx",
+    "perf": {
+      "fps_end_to_end": 81.7,
+      "frame_ms_p50": 11.04,
+      "frame_ms_p95": 11.71,
+      "frames": 1470,
+      "inference_ms_p50": 8.22,
+      "inference_ms_p95": 8.84,
+      "model_load_ms": 1231.27,
+      "peak_rss_mb": 324.56,
+      "postprocess_ms_p50": 0.02,
+      "preprocess_ms_p50": 0.15,
+      "tracker_ms_p50": 0.01
+    },
+    "totals": {
+      "line1": {
+        "in": 23,
+        "out": 16
+      }
+    },
+    "tracker": "bytetrack",
+    "video": "data/raw/UA-DETRAC/DETRAC-Images/MVI_39031/img%05d.jpg"
+  }
+}

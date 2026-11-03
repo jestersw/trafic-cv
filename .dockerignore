@@ -1,0 +1,15 @@
+.git
+.venv
+.dvc/cache
+.dvc/tmp
+.dvc/config.local
+data
+models
+outputs
+runs
+reports
+notebooks
+mlflow.db
+mlartifacts
+rust-infer/target
+**/__pycache__

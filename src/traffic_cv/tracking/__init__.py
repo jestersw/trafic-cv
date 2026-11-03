@@ -4,6 +4,14 @@ from traffic_cv.tracking.sort import SORT
 
 TRACKERS = {"bytetrack": ByteTrack, "sort": SORT}
 
+try:
+    import traffic_rs
+
+    TRACKERS["bytetrack-rs"] = traffic_rs.ByteTrack
+    TRACKERS["sort-rs"] = traffic_rs.SORT
+except ImportError:
+    pass
+
 
 def build_tracker(name: str, **kwargs) -> Tracker:
     try:

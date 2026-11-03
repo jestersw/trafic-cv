@@ -1,0 +1,32 @@
+{
+  "weights": "models/baseline.pt",
+  "split": "test",
+  "map50": 0.667,
+  "map50_95": 0.4806,
+  "precision": 0.6956,
+  "recall": 0.6518,
+  "per_class": {
+    "car": {
+      "ap50": 0.8787,
+      "ap50_95": 0.6364
+    },
+    "bus": {
+      "ap50": 0.8268,
+      "ap50_95": 0.5697
+    },
+    "van": {
+      "ap50": 0.6037,
+      "ap50_95": 0.4501
+    },
+    "others": {
+      "ap50": 0.3588,
+      "ap50_95": 0.2663
+    }
+  },
+  "speed_ms": {
+    "preprocess": 0.09,
+    "inference": 0.39,
+    "loss": 0.0,
+    "postprocess": 7.33
+  }
+}

@@ -17,6 +17,8 @@ experiments:
     augmentations: null
 
   finetune:
+    epochs: 35
+    workers: 4
     fliplr: 0.5
     augmentations:
       - RandomBrightnessContrast: {brightness_limit: 0.3, contrast_limit: 0.3, p: 0.5}
@@ -26,14 +28,7 @@ experiments:
           transforms:
             - MotionBlur: {blur_limit: 7}
             - GaussianBlur: {blur_limit: [3, 5]}
-            - Defocus: {radius: [1, 3]}
       - GaussNoise: {std_range: [0.02, 0.08], p: 0.25}
-      - ImageCompression: {quality_range: [40, 90], p: 0.25}
-      - OneOf:
-          p: 0.2
-          transforms:
-            - RandomRain: {drop_length: 12, blur_value: 3, brightness_coefficient: 0.85}
-            - RandomFog: {fog_coef_range: [0.1, 0.3], alpha_coef: 0.08}
       - ToGray: {p: 0.05}
 
 mlflow:

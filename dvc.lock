@@ -86,3 +86,42 @@ stages:
       hash: md5
       md5: 7596fd4ab97faf9929e66e54c44dbae3
       size: 1007
+  train_baseline:
+    cmd: python -m traffic_cv.detection.train --exp baseline
+    deps:
+    - path: data/processed/detrac
+      hash: md5
+      md5: 0990f7d41212c356185c9b46a9cd4869.dir
+      size: 2412111390
+      nfiles: 42347
+    - path: src/traffic_cv/detection
+      hash: md5
+      md5: 89fddf8f23a5f0ac86e9f3782d7673d7.dir
+      size: 9585
+      nfiles: 5
+    params:
+      configs/train.yaml:
+        base:
+          model: yolo11s.pt
+          data: data/processed/detrac/dataset.yaml
+          epochs: 50
+          imgsz: 640
+          batch: 16
+          patience: 15
+          workers: 8
+          seed: 42
+          deterministic: true
+          cos_lr: true
+          project: runs/detect
+          plots: true
+        experiments.baseline:
+          augmentations:
+    outs:
+    - path: models/baseline.pt
+      hash: md5
+      md5: bbf755b208276f7b92ac38a1b776a21f
+      size: 19156698
+    - path: reports/detection/baseline.json
+      hash: md5
+      md5: 346da9f4bb46f9e4877d91c1baa34427
+      size: 536
